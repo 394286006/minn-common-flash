@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" minHeight="22" height="25" minWidth="150" fontSize="12" horizontalGap="2" initialize="completeHandler(event)">
+
+	<fx:Script>
+		<![CDATA[
+			import p.minn.event.DateSelectEvent;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.formatters.DateFormatter;
+			import mx.managers.PopUpManager;
+			private var fm:DateFormatter=new DateFormatter();
+			private var ld:LocalDateChooser;
+			private var _dateInfo:Object=null;
+			private var _curDate:Date=null;
+			[Bindable]
+			public var dtVisible:Boolean=true;
+			private function completeHandler(evt:FlexEvent):void{
+				ld=new LocalDateChooser();
+				fm.formatString="YYYY-MM-DD JJ:NN:SS";
+				ld.addEventListener(DateSelectEvent.DATE_DOUBLE_CLICK_SHOW_SELECT,function(evt:DateSelectEvent):void{
+					_dateInfo=evt.data;
+					show_id.text=evt.data.en_name;
+				});
+				
+				dt_id.visible=dtVisible;
+				dt_id.includeInLayout=dtVisible;
+			}
+			
+			
+			
+			protected function image1_clickHandler(evt:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				PopUpManager.addPopUp(ld,this);
+				ld.x=evt.stageX -ld.width+2;
+				ld.y=evt.stageY;
+			}
+			
+			public function get dateInfo():Object{
+				return _dateInfo;
+			}
+			
+			
+			public function set text1(de:*):void{
+				if(de is Date){
+					show_id.text=fm.format(de);
+					if(_dateInfo==null)
+						_dateInfo=new Object();
+					_dateInfo.year=(de as Date).getFullYear();
+					_dateInfo.month=(de as Date).getMonth()+1;
+					_dateInfo.day=(de as Date).getDate();
+					_dateInfo.hour=(de as Date).getHours();
+					_dateInfo.minu=(de as Date).getMinutes();
+					_dateInfo.second=(de as Date).getSeconds();
+				}else{ 
+					show_id.text=de.toString();
+					if(de!=null&&de!=''){
+					_curDate=DateFormatter.parseDateString(de.toString());
+					if(_dateInfo==null)
+						_dateInfo=new Object();
+					_dateInfo.year=_curDate.getFullYear();
+					_dateInfo.month=_curDate.getMonth()+1;
+					_dateInfo.day=_curDate.getDate();
+					_dateInfo.hour=_curDate.getHours();
+					_dateInfo.minu=_curDate.getMinutes();
+					_dateInfo.second=_curDate.getSeconds();
+					}
+				}
+			}
+			
+			public function get currentDate():Date{
+				return new Date(_dateInfo.year,_dateInfo.month-1,_dateInfo.day,_dateInfo.hour,_dateInfo.minu,_dateInfo.second);
+			}
+			
+			public function get text():String{
+				return show_id.text;
+			}
+		
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:TextInput width="100%" editable="false" id="show_id"/>
+	<mx:VBox verticalGap="1">
+		<mx:VRule height="2" width="0"/>
+		<mx:Image source="assets/img/datetime.gif" useHandCursor="true" visible="{dtVisible}" id="dt_id" buttonMode="true" click="image1_clickHandler(event)"/>
+	</mx:VBox>
+	
+</mx:HBox>

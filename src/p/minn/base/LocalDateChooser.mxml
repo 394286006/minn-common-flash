@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="190" verticalGap="0" fontSize="15" height="190" cornerRadius="5" creationComplete="completeHandler(event)" backgroundColor="#F5F2F2">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			//create by minn qq:394286006 2010-12-11
+			import p.minn.event.DateSelectEvent;
+			
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			private var currentyear:String;
+			private var currentmonth:String;
+			private var currentday:String;
+			
+			private var selyear:String;
+			private var selmonth:String;
+			private var selday:String;
+			
+			private function TimeShow():void{
+				var d:Date=new Date(); 
+				currentyear=d.getFullYear().toString();
+				currentmonth=(d.getMonth()+1).toString();
+				if(int(currentmonth)<10)
+					currentmonth="0"+currentmonth;
+				if(int(currentmonth)==13)
+					currentmonth="1";
+//				if(int(currentmonth)<10)
+//					currentmonth="0"+currentmonth;
+				currentday=d.getDate().toString();
+				if(int(currentday)<10)
+					currentday="0"+currentday;
+				
+			}
+			
+			private var hourses:Array=[];
+			private var mins:Array=[];
+			private var seconds:Array=[];
+			private function completeHandler(evt:FlexEvent):void{
+				TimeShow();
+				year_id.text=currentyear;
+				month_id.text=currentmonth;
+				go2date(int(currentyear),int(currentmonth)-1);
+				for(var i:int=0;i<24;i++){
+					var t:String="";
+					var o:Object=new Object();
+					if(i<10){
+						t="0"+i;
+					}else
+						t=i+"";
+					o.label=t;
+					hourses.push(o);
+				}
+				hour_id.dataProvider=hourses;
+				for(var i:int=0;i<60;i++){
+					var t:String="";
+					var o:Object=new Object();
+					if(i<10){
+						t="0"+i;
+					}else
+						t=i+"";
+					o.label=t;
+					mins.push(o);
+				}
+				min_id.dataProvider=mins;
+				second_id.dataProvider=mins;
+				
+				this.addEventListener(DateSelectEvent.DATE_DOUBLE_CLICK_SELECT,function(evt:DateSelectEvent):void{
+//					Alert.show(evt.data.toString());
+					var dateobj:Object=new Object();
+					dateobj.ch_name=year_id.text+"年"+month_id.text+"月"+evt.data+"日  "+hour_id.selectedItem.label+"时"+
+					min_id.selectedItem.label+"分"+second_id.text+"秒";
+					dateobj.en_name=year_id.text+"-"+month_id.text+"-"+evt.data+"  "+hour_id.selectedItem.label+":"+
+					min_id.selectedItem.label+":"+second_id.text;
+					dateobj.year=year_id.text;
+					dateobj.month=month_id.text;
+					dateobj.day=evt.data;
+					dateobj.hour=hour_id.selectedItem.label;
+					dateobj.minu=min_id.selectedItem.label;
+					dateobj.second=second_id.text;
+//					Alert.show(dateobj.);
+					dis(dateobj);
+					
+				});
+			}
+	        private function dis(da:Object):void{
+				this.dispatchEvent(new DateSelectEvent(DateSelectEvent.DATE_DOUBLE_CLICK_SHOW_SELECT,da,true));
+				PopUpManager.removePopUp(this);
+			}
+			private function go2date(curyear:Number,curmonth:Number):void{
+				var curD:Date=new Date(curyear,curmonth,1);
+				var curmaxday:Number=maxDay(curD);
+				var row:Number=curmaxday/7;
+				var firstdaycurmonth:Number=curD.getDay();
+				var countday:int=1;
+				for(var i:int=0;i<row;i++){
+					var hb:HBox=new HBox();
+					hb.height=18;
+					hb.setStyle("horizontalGap",8);
+					for(var j:int=0;j<7;j++){
+						var b:DrawDate=new DrawDate();
+						b.width=18;
+						b.width=18				
+						if(countday<=curmaxday){
+							
+							if(i==0)
+							{
+								if(j>=firstdaycurmonth){
+									if(countday<10)
+										b.text="0"+countday+'';	
+									else{
+										b.text=countday+'';	
+									}
+									countday++;
+								}
+							}else {
+								if(countday<10)
+									b.text="0"+countday+'';	
+								else
+									b.text=countday+'';
+								countday++;
+							}
+						}
+						
+						hb.addChild(b);
+					
+					}
+					day_id.addChild(hb);
+				}
+			}
+			
+			
+			private function preyear_clickHandler():void{
+				day_id.removeAllChildren();
+				var m:int=int(month_id.text);
+				var y:int=int(year_id.text);
+				year_id.text=(y-1).toString();
+				go2date(y-1,m);
+				
+			}
+			
+			private function nextyear_clickHandler():void{
+				day_id.removeAllChildren();
+				var m:int=int(month_id.text);
+				var y:int=int(year_id.text);
+				year_id.text=(y+1).toString();
+				go2date(y+1,m);
+			}
+			private function premonth_clickHandler():void{
+				day_id.removeAllChildren();
+				var m:int=int(month_id.text);
+				var y:int=int(year_id.text);
+				if(m==1){
+					m=12;
+					y=y-1;
+					year_id.text=y.toString();
+					
+				}
+//				if(m<10){
+//					month_id.text="0"+(m-1).toString();
+//				}else
+				month_id.text=(m-1).toString();
+				go2date(y,m-1);
+			}
+			
+			private function nextmonth_clickHandler():void{
+				day_id.removeAllChildren();
+				var m:int=int(month_id.text);
+				var y:int=int(year_id.text);
+				if(m==12){
+					m=0;
+					year_id.text=(y+1).toString();
+				}
+		
+				   month_id.text=(m+1).toString();
+				go2date(y,m);
+			}
+			
+			private function maxDay(d:Date):Number{
+				var temp:Number=0;
+				var year:Number=d.getFullYear();
+				var month:Number=d.getMonth()+1;
+				if(month==1||month==3||month==5||month==7||month==8||month==10||month==12){
+					temp= 31;
+				}else if(month==4||month==6||month==9||month==11){
+					temp= 30
+				}else if(month==2){
+					var dd:Date=new Date(year+"/2/29");
+					if(dd.getMonth()==1)temp= 29;
+					else temp= 28;
+					
+				}
+				return temp;
+			}
+			
+			
+		]]>
+	</fx:Script>
+	<mx:HBox horizontalGap="0" paddingTop="8" paddingLeft="5" paddingRight="5" backgroundColor="#81B6F8" color="#FEFEFE">
+		<mx:Image source="assets/img/arrow_prev.gif" useHandCursor="true" buttonMode="true" click="preyear_clickHandler()"/><s:Label id="year_id" text="2010" paddingTop="1" /><s:Label text="年"/><mx:Image source="assets/img/arrow_next.gif"  useHandCursor="true" buttonMode="true" click="nextyear_clickHandler()"/>
+		<mx:Spacer width="16"/><mx:Image source="assets/img/arrow_prev.gif"  useHandCursor="true" buttonMode="true" click="premonth_clickHandler()"/><s:Label id="month_id" text="12" paddingTop="1" width="16"/><s:Label text="月"/><mx:Image source="assets/img/arrow_next.gif"  useHandCursor="true" buttonMode="true" click="nextmonth_clickHandler()"/>
+		<mx:Spacer width="6"/><mx:Image y="-10" source="assets/img/close.gif" useHandCursor="true" buttonMode="true" click="PopUpManager.removePopUp(this)"/>
+	</mx:HBox>
+	<mx:HBox paddingLeft="6" fontSize="18" width="100%" backgroundColor="#9ADFF9">
+		<s:Label text="日"/><s:Label text="一"/><s:Label text="二"/><s:Label text="三"/><s:Label text="四"/><s:Label text="五"/><s:Label text="六"/>
+	</mx:HBox>
+	<mx:VBox paddingLeft="5" id="day_id"/>
+	<mx:HBox horizontalGap="2"  paddingLeft="5" paddingRight="5" paddingTop="5" fontSize="10">
+		<mx:ComboBox id="hour_id" width="43"/><s:Label text="时" paddingTop="2" fontSize="13"/><mx:ComboBox id="min_id" width="43"/><s:Label text="分"  paddingTop="2" fontSize="13"/>
+		<mx:ComboBox id="second_id"  width="43"/><s:Label text="秒"  paddingTop="2" fontSize="13"/>
+	</mx:HBox>
+</mx:VBox>
